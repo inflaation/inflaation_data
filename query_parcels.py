@@ -57,4 +57,4 @@ def query_parcels_by_installation(timestamp):
     filename = 'installations_' + timestamp + '.json'
     df.to_json(filename, orient='records')
 
-query_parcels_by_installation(int(time.time()))
+query_parcels_by_installation(str(int(time.time())))
