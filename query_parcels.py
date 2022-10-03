@@ -1,7 +1,9 @@
 import pandas as pd
 import urllib.request
 import json
-import time
+from github import Github
+g = Github("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")
+
 
 def query_graphql(graphql_retrieve_query):
     events = []
@@ -33,10 +35,10 @@ query_installations_template ='''
 }
 '''
 
-def query_parcels_by_installation(timestamp):
+def query_parcels_by_installation():
     parcels_installations_list = []
     i=0
-    for id_installation in range(56,92):
+    for id_installation in range(56,57):
         print(id_installation)
         last_id= ''
         empty_query = False
@@ -54,7 +56,31 @@ def query_parcels_by_installation(timestamp):
     df = pd.json_normalize(parcels_installations_list)
     df =df.drop_duplicates(subset='id', keep='last').reset_index(drop=True)
     df.sort_values(by='id', ascending=True)
-    filename = 'installations_' + timestamp + '.json'
-    df.to_json(filename, orient='records')
+    df.to_json('installations.json', orient='records')
 
-query_parcels_by_installation(str(int(time.time())))
+    #Github Upload
+    repo = g.get_user().get_repo('inflaation_data')
+    all_files = []
+    contents = repo.get_contents("")
+    while contents:
+        file_content = contents.pop(0)
+        if file_content.type == "dir":
+            contents.extend(repo.get_contents(file_content.path))
+        else:
+            file = file_content
+            all_files.append(str(file).replace('ContentFile(path="','').replace('")',''))
+
+    with open('installations.json', 'r') as file:
+        content = file.read()
+
+    # Upload
+    git_file = 'installations.json'
+    if git_file in all_files:
+        contents = repo.get_contents(git_file)
+        repo.update_file(contents.path, "committing files", content, contents.sha, branch="master")
+        print(git_file + ' UPDATED')
+    else:
+        repo.create_file(git_file, "committing files", content, branch="master")
+        print(git_file + ' CREATED')
+
+query_parcels_by_installation()

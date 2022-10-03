@@ -75,11 +75,11 @@ app.layout = html.Div([
     Output('kek-quantity', 'children'),
     Input('alchemica-type-radio', 'value'))
 def set_alchemica_type(selected_alchemica):
-    list_of_jsons = glob.glob('*.json')  # * means all if need specific format then *.csv
-    latest_json = max(list_of_jsons, key=os.path.getctime)
-    latest_timestamp = latest_json[14:-5]
+    #list_of_jsons = glob.glob('*.json')  # * means all if need specific format then *.csv
+    #latest_json = max(list_of_jsons, key=os.path.getctime)
+    latest_timestamp = 1664800044
 
-    query_df = pd.read_json(latest_json)
+    query_df = pd.read_json("https://raw.githubusercontent.com/inflaation/inflaation_data/main/installations.json")
 
     #Associate type.id & harvest rate from the recipe book
     fud_harvester_quantity = [len(query_df[(query_df['type.id'] == 56)]), len(query_df[(query_df['type.id'] == 57)]),
